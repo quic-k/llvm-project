@@ -476,7 +476,13 @@ constructHexagonLinkArgs(Compilation &C, const JobAction &JA,
       if (!Args.hasArg(options::OPT_nolibc))
         CmdArgs.push_back("-lc");
     }
-    CmdArgs.push_back("-lgcc");
+
+    ToolChain::RuntimeLibType RtLib = HTC.GetRuntimeLibType(Args);
+    if (RtLib == ToolChain::RLT_CompilerRT) {
+      CmdArgs.push_back("-lclang_rt.builtins");
+    } else {
+      CmdArgs.push_back("-lgcc");
+    }
 
     CmdArgs.push_back("--end-group");
   }
@@ -547,11 +553,8 @@ HexagonToolChain::getSmallDataThreshold(const ArgList &Args) {
 }
 
 std::string HexagonToolChain::getCompilerRTPath() const {
-  SmallString<128> Dir(getDriver().SysRoot);
-  llvm::sys::path::append(Dir, "usr", "lib");
-  if (!SelectedMultilibs.empty()) {
-    Dir += SelectedMultilibs.back().gccSuffix();
-  }
+  SmallString<128> Dir(getDriver().ResourceDir);
+  llvm::sys::path::append(Dir, "lib", getDriver().getTargetTriple());
   return std::string(Dir);
 }
 
@@ -593,6 +596,10 @@ void HexagonToolChain::getHexagonLibraryPaths(const ArgList &Args,
     }
     LibPaths.push_back(LibDirCpu);
     LibPaths.push_back(LibDir);
+  }
+  if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs) &&
+      GetRuntimeLibType(Args) == ToolChain::RLT_CompilerRT) {
+    LibPaths.push_back(getCompilerRTPath());
   }
 }
 

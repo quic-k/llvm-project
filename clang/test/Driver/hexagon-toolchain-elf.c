@@ -187,6 +187,8 @@
 // CHECK330: "-L{{.*}}/Inputs/hexagon_tree/Tools/bin/../target/hexagon/lib"
 // CHECK330: "{{[^"]+}}.o"
 // CHECK330: "--start-group" "-lstandalone" "-lc" "-lgcc" "--end-group"
+// CHECK330-NOT: "-lclang_rt.builtins"
+// CHECK330-NOT: "-L{{.*}}/lib/clang/{{[0-9]+}}/lib/hexagon-unknown-elf"
 // CHECK330: "{{.*}}/Inputs/hexagon_tree/Tools/bin/../target/hexagon/lib/v60/fini.o"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -206,6 +208,8 @@
 // CHECK331-SAME: "-L{{.*}}/Inputs/hexagon_tree/Tools/bin/../target/hexagon/lib"
 // CHECK331-SAME: "{{[^"]+}}.o"
 // CHECK331-SAME: "-lstdc++" "-lm" "--start-group" "-lstandalone" "-lc" "-lgcc" "--end-group"
+// CHECK331-NOT: "-lclang_rt.builtins"
+// CHECK331-NOT: "-L{{.*}}/lib/clang/{{[0-9]+}}/lib/hexagon-unknown-elf"
 // CHECK331-SAME: "{{.*}}/Inputs/hexagon_tree/Tools/bin/../target/hexagon/lib/v60/fini.o"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -574,3 +578,14 @@
 // RUN:   -ccc-install-dir %S/Inputs/hexagon_tree/Tools/bin \
 // RUN:   -mcpu=hexagonv60 %s 2>&1 | FileCheck -check-prefix=CHECK384 %s
 // CHECK384:          "-fno-use-init-array"
+
+// -----------------------------------------------------------------------------
+// Switching builtins library with --rtlib
+// -----------------------------------------------------------------------------
+// RUN: %clang -### --target=hexagon-unknown-elf \
+// RUN:   -ccc-install-dir %S/Inputs/hexagon_tree/Tools/bin \
+// RUN:   -mcpu=hexagonv60 \
+// RUN:   --rtlib=compiler-rt %s 2>&1 | FileCheck -check-prefix=CHECK385 %s
+// CHECK385:          "-L{{.*}}/lib/clang/{{[0-9]+}}/lib/hexagon-unknown-elf"
+// CHECK385:          "-lclang_rt.builtins"
+// CHECK385-NOT:      "-lgcc"
