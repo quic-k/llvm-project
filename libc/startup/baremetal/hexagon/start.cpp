@@ -79,8 +79,8 @@ void _start() {
 }
 } // extern "C"
 
-// The simulator services semihosting when trap0 is executed. Put the trap0
-// handler at event-vector slot 8; other slots are unexpected and spin.
+// The simulator services semihosting when trap0 is executed. Reset restarts at
+// _start, trap0 returns through slot 8, and unsupported events spin.
 asm(".text\n\t"
     ".p2align 4\n"
     "__llvm_libc_hexagon_event_spin:\n\t"
@@ -90,7 +90,7 @@ asm(".text\n\t"
     ".p2align 12, 0\n\t"
     ".global __llvm_libc_hexagon_event_vectors\n"
     "__llvm_libc_hexagon_event_vectors:\n\t"
-    "jump __llvm_libc_hexagon_event_spin\n\t"  // 0  reset
+    "jump _start\n\t"                          // 0  reset
     "jump __llvm_libc_hexagon_event_spin\n\t"  // 1  nmi
     "jump __llvm_libc_hexagon_event_spin\n\t"  // 2  error
     "jump __llvm_libc_hexagon_event_spin\n\t"  // 3  reserved
