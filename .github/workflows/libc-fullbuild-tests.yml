@@ -162,6 +162,7 @@ jobs:
           -DLLVM_USE_LINKER=lld-23
           -DCMAKE_INSTALL_PREFIX=/__w/llvm-project/llvm-project/install
           -DLIBC_COMPILE_OPTIONS_NATIVE=''
+          -DLLVM_ENABLE_WERROR=ON
         "
 
         if [[ "${{ matrix.testing }}" != "SKIP" ]]; then
